@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html>
+    <!--Copyright (C) Swastik Roy, 2018-->
+    <head>
+        <meta charset="UTF-8">
+        <meta name="description" content="Lambda Calculus Evaluator">
+        <meta name="keywords" content="Lambda Calculus, Lambda, Functional Programming">
+        <meta name="author" content="Swastik Roy">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+        <title>Lexical Analyzer JS</title>
+        <script src="dist/scripts/lexer.min.js"></script>
+        <link rel="stylesheet" href="dist/css/styles.min.css" />
+
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script src="dist/scripts/scripts.min.js"></script>
+        <link rel="stylesheet" href="dist/css/styles.min.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.13/semantic.min.css"/>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.13/semantic.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+        <style>
+            .vue-unloaded{
+                display:none;
+            }
+            .notloaded{
+                display: none !important;
+            }
+        </style>
+    </head>
+    <body>
+        <div style="text-align:center; margin-top:80px;" class="my-preloader">
+            <h4>Loading Lambda Evaluator</h4>
+            <div class="spinner">
+                <div class="dot1"></div>
+                <div class="dot2"></div>
+            </div>
+            
+        </div>
+        <div class="container notloaded"  id="lexer" class="vue-unloaded" style="min-height:560px;">
+            <br /><br />
+            <h2 style="text-align:center;">Lexical Analyzer</h2>
+            <br />
+            <div class="row">
+                <div class="col-sm-6">
+                    <div class="ui form" style="margin: 0 auto;">
+                        <div class="field">
+                            <h4>Regular Expression</h4>
+                            <input placeholder="Eg., R1=(a+b)(c+e)*ab*" v-model="regexInput"  v-on:keyup.enter="addRegex" type="text"   onkeypress="return isEnterKey(event)" />
+                        </div>
+                        
+                    </div>
+                    <br />
+
+                    <div v-on:click="addRegex" class="ui submit button" style="float:right;">Add Regex</div>
+                    <br />
+                    <div class="ui dropdown">
+                        <div class="text">Select from examples</div>
+                        <i class="dropdown icon"></i>
+                        <div class="menu">
+                            <div class="item" v-for="option in examples" v-on:click="regexInput=option"><span v-html="option"></span></div>
+                        </div>
+                    </div>
+                    
+                    <hr />
+                    <div class="ui segments">
+                        <div class="ui clearing segment" v-for="(element,index) in regexes">
+                            
+                            
+                           <div>
+                               <span>{{element.name}} = {{element.value}}</span>
+                               
+                                <div class="ui small basic icon buttons"  style="float:right">
+                                    <button class="ui button" v-on:click="moveup(index)" v-if="index != 0"><i class="fa fa-chevron-up"></i></button>
+                                    <button class="ui button" v-if="index != regexes.length-1"  v-on:click="movedown(index)"><i class="fa fa-chevron-down"></i></button>
+                                    <button class="ui button" v-on:click="removeRegex(index)"><i class="fa fa-trash-o"></i></button>
+                                </div>
+                           </div>
+                            	
+                            
+                        </div>
+                    </div>
+                    
+                    
+                    
+               
+                </div>
+
+                <div class="col-sm-6">
+                    <div class="ui form">
+                        <div class="field">
+                            <h4>Input</h4>
+                            <textarea rows="3"   onkeypress="return isEnterKey(event)" v-on:keyup.enter="evaluate" v-model="input" id="input"></textarea>
+                        </div>
+                        <div v-on:click="evaluate" class="ui submit button" style="float:right;">Tokenize</div>
+                    
+                        <div class="field">
+                            
+                            <h4>Output</h4>
+                            <div style="border:solid 2px #ccc; border-radius:4px; min-height:200px; padding:10px;">
+                                    <h3><span v-if="input" style="font-size:0.7em">Input Expression:</span> 
+                                        <span v-html="input"></span></h3>
+                                    <div class="ui negative message" v-if="error">
+                                        <i class="close icon"></i>
+                                        <div class="header">
+                                            Invalid Input
+                                        </div>
+                                        <p>{{error}}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        
+                                        <div class="ui label" v-for="(tok, index) in results">
+                                            <!--<i class="mail icon"></i>-->
+                                            {{tok.lexeme}}
+                                            <a class="detail">{{tok.type.name}}</a>
+                                        </div>
+                                        <div v-if="lexError">
+                                            Lexical Error
+                                        </div>
+                                    </div>
+                                    
+                                
+                                    
+                            </div>
+               
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+            <div class="row">
+                <div class="col-sm-offset-3 col-sm-6">
+                    <br /><br />
+                    <h3 style="text-align:center;">How to use this tool?</h3>
+                    <div class="ui list">
+                        <a class="item">
+                            <div class="content">
+                                <div class="header">How to add regular expressions?</div>
+                                <div class="description">
+                                    Regular expressions should be written in the form of "name"="expression". <br />
+                                    Eg., R1=(a+b)e(c+d) or R2=(g+f)*(ab)*
+                                </div>
+                            </div>
+                        </a>
+                        <a class="item">
+                            <div class="content">
+                                <div class="header">What happens when more than one regular expression is matched?</div>
+                                <div class="description">
+                                    If more than one is matched, then the one which is order first will be selected.
+                                    You may change the ordering by 'up' and 'down' arrows.
+                                </div>
+                            </div>
+                        </a>
+                        <a class="item">
+                            <div class="content">
+                                <div class="header">How to tokenize an input?</div>
+                                <div class="description">
+                                    1. Add regular expressions. 2. Write your input in the input box. 3. Click tokenize button. 
+                                </div>
+                            </div>
+                        </a>
+                       
+                        
+                    </div>
+                    <br />
+                    <br /><br />
+                </div>
+
+                <div class="col-sm-offset-3 col-sm-6" style="text-align:center;">
+                    <h3>FAQ</h3>
+                    <div class="ui list">
+                        <a class="item" href="https://en.wikipedia.org/wiki/Lexical_analysis" target="_blank">What is Lexical Analysis?</a>
+                        <a class="item" href="https://en.wikipedia.org/wiki/Regular_expression" target="_blank">What are Regular Expressions?</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div class="container notloaded" style="margin-top:50px;">
+                <p style="text-align:center;">Copyright © 2018 Swastik Roy</p>
+            </div>
+        </footer>
+
+
+
+        <script>
+            
+            function isEnterKey(evt)
+            {
+                var charCode = (evt.which) ? evt.which : event.keyCode
+                if (charCode == 13)
+                    return false;
+
+                return true;
+            }
+
+            $(document).ready(function(){
+                $(".ui.dropdown").dropdown();
+            });
+
+        
+
+            var vm = new Vue({
+                el: '#lexer',
+                data: {
+                    input: '',
+                    regexes: [],
+                    results: [],
+                    regexInput: '',
+                    error: null,
+                    lexError: null,
+                    examples: ["R1= (ab)*(e+c)(a+b)", "R2 = (ab)*(d+c)a", "R3= (ab)*(d+c)b", "R4= (ab)*(c)a"]
+                },
+                methods: {
+                    readRegex: function(str){
+                        return InputReader.readRegex(str);
+                    },
+                    addRegex: function(){
+                        var regex = InputReader.readRegex(this.regexInput);
+                        this.regexes.push(regex);
+                    },
+                    removeRegex: function(index){
+                        var newArr= [];
+                        for(var i=0;i<this.regexes.length; i++){
+                            if(i!=index)newArr.push(this.regexes[i]);
+                        }
+                        this.regexes = newArr;
+                    },
+                    precheckInput: function(input){
+                        //TODO -add custom implementation here
+                        return input;
+                    },
+                    evaluate: function(){
+                        
+                        if(this.input.trim().length == 0){
+                            this.error = "No input provided";
+                            return;
+                        }
+                        if(this.regexes.length == 0){
+                            this.error = "No regular expression added";
+                            return;
+                        }
+                        this.error = null;
+                        var res = Lexer.init(this.input, this.regexes);
+                        if(res.err){ this.error = res.message;  return;}
+                        this.results = [];
+                        while(true){
+                            var tok = Lexer.GetToken();
+                            if(tok && tok.eof){
+                                this.results.push(Token("End of Input", RegularExpression("END OF INPUT", "")));
+                                break;
+                            }
+                            else if(!tok){
+                                this.lexError = true;
+                                break;
+                            }
+                            this.lexError = false;
+                            this.results.push(tok);
+                            
+                        }
+                       
+                     
+                        return false;
+                    },
+                    moveup: function(index){
+                        if(index != 0){
+                            var indexVal = this.regexes[index];
+                            var upVal = this.regexes[index-1];
+                            Vue.set(this.regexes, index-1, indexVal);
+                            Vue.set(this.regexes, index, upVal);
+                        }
+                    },
+                    movedown: function(index){
+                        if(index != this.regexes.length-1){
+                            var indexVal = this.regexes[index];
+                            var downVal = this.regexes[index+1];
+                            Vue.set(this.regexes, index+1, indexVal);
+                            Vue.set(this.regexes, index, downVal);
+                        }
+                    }
+                },
+                mounted: function(){
+                    $(".notloaded").removeClass("notloaded");
+                    $(".my-preloader").addClass("notloaded");
+                }
+            });
+        </script>
+    </body>
+</html>
