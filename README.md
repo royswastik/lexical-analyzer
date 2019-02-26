@@ -4,7 +4,7 @@ A generic lightweight library(and web app) for lexical analysis.
 Demo: http://swastikroy.me/lexical-analyzer/
 
 ***What is Lexical Analysis?***
-> Lambda calculus (also written as λ-calculus) is a formal system in mathematical logic for expressing computation based on function abstraction and application using variable binding and substitution. It is a universal model of computation that can be used to simulate any Turing machine and was first introduced by mathematician Alonzo Church in the 1930s as part of his research of the foundations of mathematics. - Wikipedia([Source](https://en.wikipedia.org/wiki/Lexical_analysis))
+> In computer science, lexical analysis, lexing or tokenization is the process of converting a sequence of characters (such as in a computer program or web page) into a sequence of tokens (strings with an assigned and thus identified meaning). A program that performs lexical analysis may be termed a lexer, tokenizer,[1] or scanner, though scanner is also a term for the first stage of a lexer. A lexer is generally combined with a parser, which together analyze the syntax of programming languages, web pages, and so forth. - Wikipedia([Source](https://en.wikipedia.org/wiki/Lexical_analysis))
 
 **How to Use**
 
